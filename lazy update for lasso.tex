@@ -1,0 +1,46 @@
+\documentclass{article}
+\begin{document}
+We maintain an array "lastupdate" which records the last time (the number of iteration) each component of $\beta$ is updated. Suppose at time $t_c$ we visit a component of $\beta$, say $\beta_i$, we compare the current number of iteration with the value of lastupdate, which we will denote by $t_l$. If there is a difference, we will check the value of $\beta_i$. There are three possibilities.
+
+\begin{enumerate}
+\item
+If $\beta_i=0$, we do not need to do anything. 
+\item
+Otherwise, assume for now that during all the updates we missed, $\beta_i$ doesn't change sign. Then we can approximate all the updates we missed (do not include the update we want to do in current time $t_c$) by an integral:
+\begin{eqnarray}
+&&\pm\sum_{j=t_l}^{t_c}\frac{\lambda}{\sqrt{\lambda^2(j-t_l+1)+H_{t_l}}}\nonumber\\
+&=&\pm\lambda\frac{1}{\lambda^2}\int_{\lambda^2}^{(t_c-t_l+1)\lambda^2}\frac{dx}{\sqrt{x+H}}\nonumber\\
+&=&\pm\frac{2}{\lambda}(\sqrt{(t_c-t_l+1)\lambda^2+H}-\sqrt{\lambda^2+H})
+\end{eqnarray}
+
+Where $H_t=\sum_i^{t}g_i^2$.
+
+There is a special case where we only missed less than 2 update, in this case the integral is not a good approximation. We will update $\beta_i$ in a normal way.
+
+\item
+If during the updates we missed, $\beta_i$ changes sign. That means that lasso "thinks" this component should not take a big value. Therefore we will take assert that $\beta_i=0$. 
+\end{enumerate}
+However in practice we will not be able to differentiate second and third case. We will compute eq (1) and compare it with $\beta_i$.
+
+To summarize the above in a pseudocode
+
+\begin{tabular}{|p{11cm}|}
+\hline
+Input: $t_l$,$t_c$,$\beta_i$,$\lambda$,$H_{t_l}$
+
+Return: $\beta_i$, $H_{t_c}$, $t_l=t_c-1$\\
+\hline
+If $\beta_i=0$ or $t_c-t_l<=1$, return $\beta_i$, $H_{t_c}=H_{t_l}$\\
+\\
+Else if $t_c-t_l-1<=2$, use normal lasso update procedure to update $\beta_i$ and $H_{t_l}$ and return $\beta_i$, $H_{t_l}$\\
+\\
+Else\\
+\\
+Compute $\Delta=$eq (1)\\
+\\
+If $|\beta_i|>|\Delta|$, return $\beta_i=sgn(\beta_i)(|\beta_i|-|\Delta|)$, $H_{t_l}=H_{t_c}+(t_c-t_l-1)\lambda^2$.\\
+\\
+Else return $\beta_i=0$, $H_{t_l}=H_{t_c}$\\
+\hline
+\end{tabular}
+\end{document}
