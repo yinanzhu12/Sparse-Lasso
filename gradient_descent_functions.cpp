@@ -34,30 +34,6 @@ db targetfunction(MSpMat X, NV y, NV beta,db lambda){
   return ret;
 }
 
-/*sgd without lasso*/
-//[[Rcpp::export]]
-NV sgdC(NV rn, MSpMat X,NV y,int epoch){
-  int p=X.rows(),r,ite=X.cols()*epoch;
-  vdb H(p,0.001);
-  NV beta(p),ret(p+epoch);
-  db og,g;
-  lop(i,0,ite-1){
-    og=0;
-    r=rn[i%X.cols()];
-    for(InIterMat it(X,r); it;++it)og-=it.value()*beta[it.row()];
-    og=1/(exp(og)+1);
-    for(InIterMat it(X,r); it;++it){
-      g=(og-y[r])*it.value();
-      int j=it.row();
-      H[j]+=g*g;
-      beta[j]-=g/sqrt(H[j]);
-    }
-    if((i+1)%(X.cols())==0)ret[(i+1)/X.cols()-1]=targetfunction(X,y,beta,0);
-  }
-  lop(i,0,p-1)ret[epoch+i]=beta[i];
-  return ret;
-}
-
 //[[Rcpp::export]]
 db lazyupdate(db beta,int betaindex,vdb& H, vi& lastupdate, db lambda,int current){
   if(beta==0)return 0;

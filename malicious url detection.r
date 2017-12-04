@@ -18,48 +18,7 @@ ytrain=readRDS('~/url_svmlight/url_ytrain.rds')
 
 rn = sample(length(ytrain))
 
-
-#first, a sgd without regularization, it runs 1 epoch at 1.3 s
-
-epoch=1
-microbenchmark(sgdC(rn,Xtrain,ytrain,epoch),times=1L)
-
-
-epoch=100
-result=sgdC(rn,Xtrain,ytrain,epoch)
-
-
-nllh=result[1:epoch]
-plot(nllh,type='l',xlab='epoch',ylab='target function',sub='convergence of sgd without lasso')
-
-#make prediction on the test data set
-
-beta=result[(epoch+1):length(result)]
-og=omega(Xtest,beta)
-ypredict=1*{og>0.5}
-dif=ypredict-ytest
-
-
-#true positive~0.285
-
-sum((1*{dif==0})*(1*{ypredict==1}))/length(ytest)
-
-#true negative~0.695
-
-sum((1*{dif==0})*(1*{ypredict==0}))/length(ytest)
-
-#false positive~0.007
-
-sum(1*{dif==1})/length(ytest)
-
-
-#false negative~0.01
-
-sum(1*{dif==-1})/length(ytest)
-
-
-
-#sgd with lasso lazy update,runs 1 epoch for 1.61 s
+#stochastic gradient descent with lasso lazy update,runs 1 epoch for 1.61 s
 
 epoch=1
 lambda=0.000001
@@ -79,19 +38,19 @@ ypredict=1*{og>0.5}
 dif=ypredict-ytest
 
 #true positive~0.288
-```{r}
+
 sum((1*{dif==0})*(1*{ypredict==1}))/length(ytest)
-```
+
 #true negative~0.694
-```{r}
+
 sum((1*{dif==0})*(1*{ypredict==0}))/length(ytest)
-```
+
 #false positive~0.008
-```{r}
+
 sum(1*{dif==1})/length(ytest)
-```
+
 
 #false negative~0.008
-```{r}
+
 sum(1*{dif==-1})/length(ytest)
-```
+
